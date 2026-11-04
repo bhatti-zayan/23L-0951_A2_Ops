@@ -1,4 +1,4 @@
-# Exact versions used for training in Google Colab (A100)
+# Exact versions used for training in Google Colab (GPU runtime: NVIDIA L4)
 tensorflow==2.21.0
 keras==3.13.2
 numpy==2.4.6
