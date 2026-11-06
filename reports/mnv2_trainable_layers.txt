@@ -1,0 +1,9 @@
+STAGE 1 (frozen backbone): 1,281 trainable params
+  p_ai
+
+STAGE 2 (last block unfrozen, BN frozen): 880,321 trainable params
+  mobilenetv2/block_16_expand
+  mobilenetv2/block_16_depthwise
+  mobilenetv2/block_16_project
+  mobilenetv2/Conv_1
+  p_ai
