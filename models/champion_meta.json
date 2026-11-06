@@ -1,0 +1,10 @@
+{
+  "registered_model": "23L-0951_A2_Ops_visionguard",
+  "alias": "champion",
+  "version": "2",
+  "run_id": "5047dbe55d9c49a5bb50befc045d2889",
+  "threshold": 0.83,
+  "img_size": 224,
+  "resize": "pad",
+  "exported_utc": "2026-11-06T11:20:03+00:00"
+}
