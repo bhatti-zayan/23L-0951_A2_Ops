@@ -1,0 +1,5 @@
+# Development / CI tools (not installed in the Docker image)
+-r requirements-app.txt
+pytest==8.*
+flake8==7.*
+dvc[s3]==3.67.1
