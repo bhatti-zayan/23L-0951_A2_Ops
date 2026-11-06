@@ -1,0 +1,45 @@
+# VisionGuard stack: web app + PostgreSQL. Run: docker compose up -d --build
+name: 23l-0951_a2_ops            # Docker requires lowercase project names
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data          # named volume: data survives container removal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    # NO "ports:" section -> the database is NOT published outside Compose's internal network
+
+  web:
+    build: .
+    image: 23l-0951_a2_ops-web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy               # wait until Postgres accepts connections
+    environment:
+      MODEL_MODE: ${MODEL_MODE:-local}
+      MODEL_PATH: /models/champion.keras
+      MODEL_META_PATH: /models/champion_meta.json
+      DECISION_THRESHOLD: ${DECISION_THRESHOLD:-}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-5}
+      SECRET_KEY: ${SECRET_KEY}
+      API_KEY: ${API_KEY}
+      MODEL_API_URL: ${MODEL_API_URL:-}
+      # "db" = the service name, resolved by Compose's internal DNS
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    volumes:
+      - ./models:/models:ro                      # champion model mounted read-only (from dvc pull)
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+
+volumes:
+  pgdata:
