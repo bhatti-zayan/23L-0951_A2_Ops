@@ -22,22 +22,25 @@ AUG_SETTINGS = {
 }
 
 
-def decode_and_resize(raw_bytes, img_size=IMG_SIZE):
+def decode_and_resize(raw_bytes, img_size=IMG_SIZE, mode="pad"):
     """Encoded image bytes -> uint8 tensor (img_size, img_size, 3).
 
-    - decode_image handles JPEG/PNG/GIF/WEBP/BMP; channels=3 converts
-      grayscale and drops alpha; expand_animations=False takes a GIF's first frame.
-    - resize_with_pad keeps the aspect ratio and fills the rest with black
-      (letterboxing) instead of stretching the image.
+    mode="pad":     keep aspect ratio, fill the rest with black (letterbox)  [default]
+    mode="stretch": plain resize to a square (distorts aspect ratio)
     """
     img = tf.io.decode_image(raw_bytes, channels=3, expand_animations=False)
     img.set_shape([None, None, 3])
-    img = tf.image.resize_with_pad(img, img_size, img_size, antialias=True)
+    if mode == "pad":
+        img = tf.image.resize_with_pad(img, img_size, img_size, antialias=True)
+    elif mode == "stretch":
+        img = tf.image.resize(img, (img_size, img_size), antialias=True)
+    else:
+        raise ValueError(f"unknown resize mode: {mode}")
     return tf.cast(tf.clip_by_value(tf.round(img), 0, 255), tf.uint8)
 
 
-def load_image(path, img_size=IMG_SIZE):
-    return decode_and_resize(tf.io.read_file(path), img_size)
+def load_image(path, img_size=IMG_SIZE, mode="pad"):
+    return decode_and_resize(tf.io.read_file(path), img_size, mode)
 
 
 def make_augmenter(strength="mild", seed=42):
@@ -60,24 +63,18 @@ def read_split(split_csv, data_root):
 
 
 def make_dataset(split_csv, data_root, training, img_size=IMG_SIZE,
-                 batch_size=BATCH_SIZE, augment="mild", seed=42):
+                 batch_size=BATCH_SIZE, augment="mild", seed=42, resize="pad"):
     """Split list -> batched, prefetched tf.data.Dataset of (images 0..255 float32, labels)."""
     paths, labels, _ = read_split(split_csv, data_root)
     ds = tf.data.Dataset.from_tensor_slices((paths, labels))
-    # 1) read + decode + resize, in parallel
-    ds = ds.map(lambda p, y: (load_image(p, img_size), y), num_parallel_calls=AUTOTUNE)
-    # 2) cache decoded uint8 images in RAM: decoding happens only once
+    ds = ds.map(lambda p, y: (load_image(p, img_size, resize), y), num_parallel_calls=AUTOTUNE)
     ds = ds.cache()
-    # 3) shuffle training data only; new order every epoch
     if training:
         ds = ds.shuffle(len(paths), seed=seed, reshuffle_each_iteration=True)
-    # 4) batch, then convert to float for the model
     ds = ds.batch(batch_size)
     ds = ds.map(lambda x, y: (tf.cast(x, tf.float32), tf.cast(y, tf.float32)),
                 num_parallel_calls=AUTOTUNE)
-    # 5) augmentation on training batches only (never on val/test, never inside the saved model)
     aug = make_augmenter(augment, seed) if training else None
     if aug is not None:
         ds = ds.map(lambda x, y: (aug(x, training=True), y), num_parallel_calls=AUTOTUNE)
-    # 6) prefetch: prepare the next batch while the GPU trains on the current one
     return ds.prefetch(AUTOTUNE)
