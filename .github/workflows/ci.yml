@@ -14,6 +14,7 @@ jobs:
         with:
           python-version: "3.13"          # same Python as training and the Docker image
           cache: pip
+          cache-dependency-path: requirements-app.txt
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
