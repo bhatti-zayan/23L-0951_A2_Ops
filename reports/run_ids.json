@@ -1,4 +1,11 @@
 {
   "cnn_baseline": "2e262f2bf3a54cbc889058ee0fa2e0b8",
-  "mobilenetv2": "53079fbe1a8649328a8d3451283d3fc9"
+  "mobilenetv2": "53079fbe1a8649328a8d3451283d3fc9",
+  "cmp0_base_tuned": "5047dbe55d9c49a5bb50befc045d2889",
+  "cmp1_lr_1e-4": "c193d1425d7641a0b6ddbf6cf53665dc",
+  "cmp2_no_augment": "b04fc38e9b364cf090f5eed6e0cfbf3d",
+  "cmp3_frozen_backbone": "7112fa6c907a45a0ac05d5352ea2151b",
+  "cmp4_stretch_resize": "85d852b5ef0f4c1ab7a707faa1535370",
+  "cmp5_img160": "75421f6448e64e10b6a4b110404722ba",
+  "cmp6_efficientnetb0": "44fc10a4b7ad4b1693b2862032b034fd"
 }
