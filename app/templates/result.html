@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Result{% endblock %}
+{% block content %}
+{% set cls = 'ai' if r.verdict == 'ai' else ('uncertain' if r.p_ai >= 0.5 else 'real') %}
+<section class="card result">
+  <img class="preview" src="{{ preview }}" alt="uploaded image preview">
+  <div>
+    <p class="muted small">{{ filename }}</p>
+    <h1 class="verdict {{ cls }}">{{ r.band }}</h1>
+    <div class="bar"><span style="width: {{ (r.p_ai * 100)|round(1) }}%"></span></div>
+    <table class="facts">
+      <tr><th>Probability AI-generated</th><td>{{ '%.1f'|format(r.p_ai * 100) }} %</td></tr>
+      <tr><th>Confidence in verdict</th><td>{{ '%.1f'|format(r.confidence * 100) }} %</td></tr>
+      <tr><th>Decision threshold</th><td>{{ '%.2f'|format(r.threshold) }} (chosen on validation data)</td></tr>
+      <tr><th>Model</th><td>{{ r.model_name }} v{{ r.model_version }}</td></tr>
+      <tr><th>Inference time</th><td>{{ r.latency_ms }} ms</td></tr>
+    </table>
+  </div>
+</section>
+<section class="card caveat">
+  <h2>Please read before relying on this</h2>
+  <p>VisionGuard is a statistical model trained on fewer than 1,000 web images. On its test set it was right
+     about 4 times out of 5. It is most often wrong on <strong>digital art, painted or heavily edited images,
+     photorealistic AI portraits and images from newer generators</strong>.</p>
+  <p>We tuned it to avoid wrongly calling real photos "AI", so it misses some AI images instead.
+     "Uncertain" means the model leans towards AI but is not confident enough to say so.
+     Treat the result as a hint, not proof, and never use it alone to accuse anyone of faking an image.</p>
+</section>
+<p><a class="button" href="{{ url_for('index') }}">Analyse another image</a></p>
+{% endblock %}

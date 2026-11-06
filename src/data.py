@@ -7,7 +7,6 @@ and normalise internally, so serving cannot use the wrong scaling.
 """
 from pathlib import Path
 
-import pandas as pd
 import tensorflow as tf
 import keras
 
@@ -57,6 +56,7 @@ def make_augmenter(strength="mild", seed=42):
 
 
 def read_split(split_csv, data_root):
+    import pandas as pd   # training-only dependency; keeps the serving image free of pandas
     df = pd.read_csv(split_csv)
     paths = [str(Path(data_root) / p) for p in df["rel_path"]]
     return paths, df["label"].astype("int32").tolist(), df

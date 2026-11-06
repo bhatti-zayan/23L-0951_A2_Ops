@@ -231,3 +231,6 @@ mlartifacts/
 checkpoints/
 .ipynb_checkpoints/
 .DS_Store
+
+# local dev database
+*.db

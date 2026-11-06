@@ -11,11 +11,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))   # project root, for src/
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
 
-import mlflow
-import tensorflow as tf
-from mlflow import MlflowClient
+import mlflow  # noqa: E402
+import tensorflow as tf  # noqa: E402
+from mlflow import MlflowClient  # noqa: E402
 
-from src.data import decode_and_resize
+from src.data import decode_and_resize  # noqa: E402
 
 REG_NAME, ALIAS = "23L-0951_A2_Ops_visionguard", "champion"
 
